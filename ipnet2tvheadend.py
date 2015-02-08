@@ -3,6 +3,7 @@
 
 import json
 import logging
+import os
 import re
 import urllib
 import urllib2
@@ -10,6 +11,7 @@ import urlparse
 
 from collections import defaultdict
 
+PASS = os.environ.get('TVHEADENDPASSWORD')
 
 IPNET_URL = "http://tv.ipnet.ua/ipnet.m3u"
 TVHEADEND_URL = "http://192.168.0.54:9981"
@@ -22,6 +24,18 @@ IPTV_SERVICES_URL = urlparse.urljoin(TVHEADEND_URL, "iptv/services")
 logging.basicConfig()
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
+
+
+if PASS:
+    # Create an OpenerDirector with support for Basic HTTP Authentication...
+    auth_handler = urllib2.HTTPBasicAuthHandler()
+    auth_handler.add_password(realm='tvheadend',
+                              uri=TVHEADEND_URL,
+                              user='admin',
+                              passwd=PASS)
+    opener = urllib2.build_opener(auth_handler)
+    # ...and install it globally so it can be used with urlopen.
+    urllib2.install_opener(opener)
 
 
 def iter_ipnet_channels():
